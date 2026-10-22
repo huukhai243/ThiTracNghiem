@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Bài làm {{ a.student_code }} · {{ e.title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>{{ a.student_name }} · {{ a.student_code }}</h1>
+    <div class="muted">{{ e.title }}{% if a.class_name %} · lớp {{ a.class_name }}{% endif %}</div></div>
+  <a href="{{ url_for('teacher.results', exam_id=e.id) }}">← Bảng điểm</a>
+</div>
+<div class="stats">
+  <div class="stat"><div class="k">Điểm</div><div class="v">{{ '%.2f'|format(a.score) }}</div></div>
+  <div class="stat"><div class="k">Số câu đúng</div><div class="v">{{ a.correct }}/{{ a.total }}</div></div>
+  <div class="stat"><div class="k">Bắt đầu</div><div class="v" style="font-size:18px">{{ a.started_at|vn('%H:%M:%S') }}</div></div>
+  <div class="stat"><div class="k">{{ 'Nộp lúc' if a.status == 'submitted' else 'Hết giờ, tự nộp' }}</div>
+    <div class="v" style="font-size:18px">{{ a.submitted_at|vn('%H:%M:%S') }}</div></div>
+</div>
+<section class="card answer">
+  <p class="hint" style="margin-top:0">Thứ tự câu và phương án đúng như sinh viên đã thấy. ● = sinh viên chọn (xanh: đúng, đỏ: sai);
+    chữ xanh đậm = đáp án đúng.</p>
+  {% for x in items %}
+  <div class="bank-q">
+    <div class="q-head"><b>Câu {{ x.it.position }}</b> <span class="muted">(câu {{ x.it.number }} trong ngân hàng)</span>
+      {% if x.it.points == 1 %}<span class="pill green">Đúng</span>
+      {% elif x.it.points and x.it.points > 0 %}<span class="pill amber">Được {{ '%.2f'|format(x.it.points) }} câu</span>
+      {% elif not x.chosen %}<span class="pill">Bỏ trống</span>{% else %}<span class="pill red">Sai</span>{% endif %}</div>
+    <div class="q-text">{{ x.it.text }}</div>
+    <ul>{% for label, o, picked in x.options %}
+      <li class="{{ 'correct' if o.is_correct }} {{ 'chosen' if picked }}">{{ label }}. {{ o.text }}</li>{% endfor %}</ul>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

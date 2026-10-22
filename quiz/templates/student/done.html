@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Đã nộp bài · Thi trắc nghiệm{% endblock %}
+{% block content %}
+<section class="card narrow" style="text-align:center">
+  <div class="done-icon">✓</div>
+  <h1>{{ 'Đã nộp bài' if a.status == 'submitted' else 'Hết giờ, bài đã được nộp tự động' }}</h1>
+  <p><b>{{ a.student_name }}</b> · {{ a.student_code }}{% if a.class_name %} · {{ a.class_name }}{% endif %}</p>
+  <p class="muted">{{ a.title }}<br>Nộp lúc {{ a.submitted_at|vn }} · đã trả lời {{ answered }}/{{ a.total }} câu</p>
+  <p>Giáo viên sẽ thông báo điểm sau.</p>
+  <a class="btn" href="{{ url_for('student.index') }}">Về trang chủ</a>
+</section>
+{% endblock %}

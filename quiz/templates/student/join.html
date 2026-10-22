@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Vào phòng thi · Thi trắc nghiệm{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Vào phòng thi</h1>
+  {% if current %}
+  <div class="flash warn">Bạn đang làm dở bài <b>{{ current.title }}</b>. <a href="{{ url_for('student.exam') }}">Tiếp tục làm bài →</a></div>
+  {% endif %}
+  <form method="post" action="{{ url_for('student.join') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <label>Mã phòng thi
+      <input name="code" value="{{ form.code }}" required maxlength="12" autocomplete="off" class="code-input" placeholder="VD: K7Q2MX">
+    </label>
+    <label>Họ và tên
+      <input name="name" value="{{ form.name }}" required maxlength="80" autocomplete="name">
+    </label>
+    <div class="grid2">
+      <label>MSSV<input name="student_code" value="{{ form.student_code }}" required maxlength="20" autocomplete="off"></label>
+      <label>Lớp <span class="muted">(không bắt buộc)</span><input name="class_name" value="{{ form.class_name }}" maxlength="40"></label>
+    </div>
+    <button class="btn primary block">Bắt đầu làm bài</button>
+  </form>
+  <p class="hint">Đồng hồ bắt đầu chạy ngay khi bấm “Bắt đầu làm bài”. Mỗi MSSV chỉ được thi một lần cho mỗi đề.
+    Đáp án được lưu tự động sau mỗi lần chọn.</p>
+</section>
+{% endblock %}

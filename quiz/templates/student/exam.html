@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ a.title }} · Thi trắc nghiệm{% endblock %}
+{% block nav %}{% endblock %}
+{% block content %}
+<div class="exam-head">
+  <div>
+    <div class="exam-title">{{ a.title }}</div>
+    <div class="muted">{{ a.student_name }} · {{ a.student_code }}</div>
+  </div>
+  <div class="timer" id="timer" data-remaining="{{ remaining }}" title="Thời gian còn lại">--:--</div>
+</div>
+<form method="post" action="{{ url_for('student.submit') }}" id="exam-form"
+      data-save-url="{{ url_for('student.save') }}" data-csrf="{{ csrf_token }}">
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+  <input type="hidden" name="auto" value="0" id="auto">
+  <div class="exam-layout">
+    <div class="questions">
+    {% for it in items %}
+      <article class="question" id="q{{ it.pos }}" data-pos="{{ it.pos }}">
+        <div class="q-head">
+          <span class="q-no">Câu {{ it.pos }}</span>
+          {% if it.multi %}<span class="badge">Chọn tất cả đáp án đúng</span>{% endif %}
+        </div>
+        <div class="q-text">{{ it.text }}</div>
+        {% for oid, label, text in it.options %}
+        <label class="option">
+          <input type="{{ 'checkbox' if it.multi else 'radio' }}" name="q{{ it.pos }}" value="{{ oid }}" {{ 'checked' if oid in it.selected }}>
+          <span class="opt-label">{{ label }}.</span><span class="opt-text">{{ text }}</span>
+        </label>
+        {% endfor %}
+      </article>
+    {% endfor %}
+    </div>
+    <aside class="navigator">
+      <div class="nav-title">Đã làm <span id="answered">0</span>/{{ items|length }} câu</div>
+      <div class="nav-grid">
+        {% for it in items %}<a href="#q{{ it.pos }}" data-pos="{{ it.pos }}">{{ it.pos }}</a>{% endfor %}
+      </div>
+      <button type="button" class="btn primary block" id="submit-btn">Nộp bài</button>
+      <div class="save-state muted" id="save-state"></div>
+    </aside>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='exam.js') }}"></script>{% endblock %}

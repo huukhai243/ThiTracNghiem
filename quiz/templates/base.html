@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Thi trắc nghiệm{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% block head %}{% endblock %}
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="{{ url_for('teacher.dashboard') if session.teacher_id else url_for('student.index') }}">Thi trắc nghiệm</a>
+  <nav>
+  {% if session.teacher_id %}
+    <a href="{{ url_for('teacher.dashboard') }}">Đề thi</a>
+    <span class="muted">{{ session.teacher_name }}</span>
+    <form method="post" action="{{ url_for('teacher.logout') }}" class="inline">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="link">Đăng xuất</button>
+    </form>
+  {% else %}{% block nav %}<a href="{{ url_for('teacher.login') }}">Giáo viên</a>{% endblock %}{% endif %}
+  </nav>
+</div></header>
+<main class="wrap">
+{% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

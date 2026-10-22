@@ -1,0 +1,19 @@
+# Chạy:      docker compose up -d --build
+# Giáo viên: http://localhost:8000/teacher     Sinh viên: http://<IP máy này>:8000/
+# Dừng:      docker compose down                (thêm -v để xóa luôn dữ liệu: đề thi, bài làm, tài khoản)
+services:
+  web:
+    build: .
+    image: thi-trac-nghiem:1.0
+    container_name: thi-trac-nghiem
+    ports:
+      - "8000:8000"                 # mở cho cả mạng LAN để sinh viên vào được
+    environment:
+      # Địa chỉ hiển thị cho sinh viên trên trang giáo viên, vd http://192.168.1.10:8000
+      PUBLIC_URL: ${PUBLIC_URL:-}
+    volumes:
+      - quiz-data:/app/data         # CSDL SQLite và khóa bí mật của phiên đăng nhập
+    restart: unless-stopped
+
+volumes:
+  quiz-data:

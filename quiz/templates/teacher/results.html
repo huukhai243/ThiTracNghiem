@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Bảng điểm · {{ e.title }}{% endblock %}
+{% block head %}{% if summary.doing %}<meta http-equiv="refresh" content="20">{% endif %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Bảng điểm</h1><div class="muted">{{ e.title }} · mã <span class="code">{{ e.code }}</span></div></div>
+  <div class="actions">
+    <a class="btn primary" href="{{ url_for('teacher.export', exam_id=e.id) }}">Xuất Excel</a>
+    <a href="{{ url_for('teacher.exam', exam_id=e.id) }}">← Đề thi</a>
+  </div>
+</div>
+<div class="stats">
+  <div class="stat"><div class="k">Đã nộp</div><div class="v">{{ summary.done }}</div></div>
+  <div class="stat"><div class="k">Đang làm</div><div class="v">{{ summary.doing }}</div></div>
+  {% for k, label in (('avg', 'Điểm trung bình'), ('max', 'Cao nhất'), ('min', 'Thấp nhất')) %}
+  <div class="stat"><div class="k">{{ label }}</div><div class="v">{{ '%.2f'|format(summary[k]) if summary[k] is not none else '–' }}</div></div>
+  {% endfor %}
+</div>
+{% if summary.done %}
+{% set peak = [buckets|max, 1]|max %}
+<section class="card">
+  <h2>Phổ điểm</h2>
+  <div class="bars">{% for n in buckets %}<div style="height:{{ (n / peak * 100)|round }}%"><span>{{ n if n }}</span></div>{% endfor %}</div>
+  <div class="bars-x">{% for i in range(10) %}<span>{{ i }}–{{ i + 1 }}</span>{% endfor %}</div>
+</section>
+{% endif %}
+{% if not rows %}
+<section class="card" style="text-align:center">Chưa có sinh viên nào vào thi.
+  {% if not e.is_open %}Phòng thi đang <b>đóng</b>, hãy mở ở <a href="{{ url_for('teacher.exam', exam_id=e.id) }}">trang đề thi</a>.{% endif %}</section>
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>#</th><th>MSSV</th><th>Họ và tên</th><th>Lớp</th><th class="num">Điểm</th><th class="num">Đúng</th>
+    <th>Bắt đầu</th><th>Nộp lúc</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr>
+    <td>{{ loop.index }}</td>
+    <td>{{ r.student_code }}</td>
+    <td>{{ r.student_name }}</td>
+    <td>{{ r.class_name or '' }}</td>
+    <td class="num"><b>{{ '%.2f'|format(r.score) if r.score is not none else '' }}</b></td>
+    <td class="num">{{ r.correct ~ '/' ~ r.total if r.correct is not none else '' }}</td>
+    <td>{{ r.started_at|vn('%H:%M:%S') }}</td>
+    <td>{{ r.submitted_at|vn('%H:%M:%S') }}</td>
+    <td>{% if r.status == 'doing' %}<span class="pill amber">Đang làm · còn {{ remaining[r.id] }} phút</span>
+      {% elif r.status == 'timeout' %}<span class="pill">Hết giờ, tự nộp</span>{% else %}<span class="pill green">Đã nộp</span>{% endif %}</td>
+    <td class="actions">
+      {% if r.status != 'doing' %}<a class="btn small" href="{{ url_for('teacher.attempt', exam_id=e.id, attempt_id=r.id) }}">Xem bài</a>{% endif %}
+      {% if r.status == 'doing' %}
+      <form method="post" class="inline" action="{{ url_for('teacher.allow_resume', exam_id=e.id, attempt_id=r.id) }}">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}">
+        <button class="btn small" title="Sinh viên bị thoát/đổi máy: cho vào lại bằng MSSV, thời gian tính tiếp">
+          {{ 'Đã cho vào lại' if r.allow_resume else 'Cho vào lại' }}</button></form>
+      {% endif %}
+      <form method="post" class="inline" action="{{ url_for('teacher.reset', exam_id=e.id, attempt_id=r.id) }}"
+            onsubmit="return confirm('Xóa bài làm của {{ r.student_name }} ({{ r.student_code }}) để sinh viên thi lại từ đầu?')">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="btn small danger">Cho thi lại</button></form>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% if summary.doing %}<p class="hint">Trang tự cập nhật 20 giây một lần khi còn sinh viên đang làm bài.</p>{% endif %}
+{% endif %}
+{% endblock %}

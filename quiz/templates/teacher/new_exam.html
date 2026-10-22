@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Tạo đề thi · Thi trắc nghiệm{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Tạo đề thi</h1><a href="{{ url_for('teacher.dashboard') }}">← Danh sách đề</a></div>
+{% if result and result.errors %}
+<section class="card"><h2>Lỗi trong file Word ({{ result.errors|length }})</h2>
+  <ul class="notes">{% for m in result.errors[:50] %}<li>{{ m }}</li>{% endfor %}</ul></section>
+{% endif %}
+<form method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+  <section class="card">
+    <h2>1. Ngân hàng câu hỏi (file Word)</h2>
+    <p class="muted" style="margin-top:0">Mỗi câu viết theo mẫu dưới đây. Tải <a href="{{ url_for('teacher.sample') }}">file Word mẫu</a> về sửa là nhanh nhất.</p>
+    <div class="format-box">Câu 1: Thủ đô của Việt Nam là?
+A. Hà Nội
+B. Huế
+C. Đà Nẵng
+D. TP. Hồ Chí Minh
+Đáp án: A
+
+Câu 2: Những số nào là số nguyên tố?
+A. 2      B. 9      C. 7      D. 15     <span class="muted">(nhiều phương án trên một dòng: cách nhau bằng Tab)</span>
+Đáp án: A, C                         <span class="muted">(nhiều đáp án đúng)</span></div>
+    <label>File .docx<input type="file" name="file" accept=".docx" required></label>
+  </section>
+  <section class="card">
+    <h2>2. Cài đặt đề thi</h2>
+    {% include 'teacher/_settings.html' %}
+  </section>
+  <button class="btn primary">Đọc file và tạo đề thi</button>
+  <span class="hint">Đề mới tạo ở trạng thái <b>đóng</b>: bạn kiểm tra lại câu hỏi rồi mới mở phòng thi.</span>
+</form>
+{% endblock %}

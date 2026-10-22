@@ -1,0 +1,24 @@
+{# Các ô cài đặt đề thi, dùng chung cho trang tạo đề và trang sửa đề. Biến: s #}
+<label>Tên đề thi<input name="title" value="{{ s.title or '' }}" required maxlength="120" placeholder="VD: Kiểm tra giữa kỳ – Mạng máy tính"></label>
+<div class="grid2">
+  <label>Số câu mỗi sinh viên <span class="muted">(rút ngẫu nhiên từ ngân hàng)</span>
+    <input type="number" name="num_questions" value="{{ s.num_questions }}" min="1" max="1000" required></label>
+  <label>Thời gian làm bài (phút)
+    <input type="number" name="duration_min" value="{{ s.duration_min }}" min="1" max="600" required></label>
+</div>
+<label class="check"><input type="checkbox" name="shuffle_options" value="1" {{ 'checked' if s.shuffle_options }}>
+  <span>Trộn thứ tự phương án A/B/C/D cho từng sinh viên
+  <span class="muted">(câu có phương án kiểu “Cả A và B”, “Tất cả các đáp án trên” tự động giữ nguyên thứ tự)</span></span></label>
+<label>Câu có nhiều đáp án đúng chấm thế nào?
+  <select name="multi_mode">
+    <option value="all" {{ 'selected' if s.multi_mode == 'all' }}>Chọn đúng và đủ tất cả đáp án mới được điểm câu đó</option>
+    <option value="partial" {{ 'selected' if s.multi_mode == 'partial' }}>Tính điểm từng phần (chọn sai bị trừ, không âm)</option>
+  </select></label>
+<div class="grid2">
+  <label>Mở phòng từ <span class="muted">(không bắt buộc)</span>
+    <input type="datetime-local" name="start_at" value="{{ s.start_at|vn('%Y-%m-%dT%H:%M') }}"></label>
+  <label>Đóng phòng lúc <span class="muted">(không bắt buộc)</span>
+    <input type="datetime-local" name="end_at" value="{{ s.end_at|vn('%Y-%m-%dT%H:%M') }}"></label>
+</div>
+<p class="hint" style="margin-top:-6px">Sinh viên chỉ vào được khi phòng thi đang <b>mở</b> và trong khoảng giờ trên (nếu có).
+  Vào sát giờ đóng thì bài tự nộp đúng giờ đóng phòng.</p>

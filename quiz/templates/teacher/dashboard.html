@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Đề thi · Thi trắc nghiệm{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Đề thi của tôi</h1>
+  <a class="btn primary" href="{{ url_for('teacher.new_exam') }}">+ Tạo đề thi từ file Word</a>
+</div>
+{% if not exams %}
+<section class="card" style="text-align:center;padding:40px 20px">
+  <h2>Chưa có đề thi nào</h2>
+  <p class="muted">Soạn ngân hàng câu hỏi trong Word theo <a href="{{ url_for('teacher.sample') }}">file mẫu</a>, rồi tải lên để tạo đề thi.</p>
+  <a class="btn primary" href="{{ url_for('teacher.new_exam') }}">Tạo đề thi đầu tiên</a>
+</section>
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Đề thi</th><th>Mã phòng</th><th>Trạng thái</th><th class="num">Ngân hàng</th><th class="num">Mỗi SV</th>
+    <th class="num">Thời gian</th><th class="num">Đã nộp</th><th></th></tr></thead>
+  <tbody>
+  {% for e in exams %}
+  <tr>
+    <td><a href="{{ url_for('teacher.exam', exam_id=e.id) }}"><b>{{ e.title }}</b></a></td>
+    <td><span class="code">{{ e.code }}</span></td>
+    <td>{% if e.is_open %}<span class="pill green">Đang mở</span>{% else %}<span class="pill">Đóng</span>{% endif %}</td>
+    <td class="num">{{ e.bank }} câu</td>
+    <td class="num">{{ e.num_questions }} câu</td>
+    <td class="num">{{ e.duration_min }} phút</td>
+    <td class="num">{{ e.done }}{% if e.doing %} <span class="muted">(+{{ e.doing }} đang làm)</span>{% endif %}</td>
+    <td><a href="{{ url_for('teacher.results', exam_id=e.id) }}">Bảng điểm</a></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endif %}
+{% include 'teacher/_join_hint.html' %}
+{% endblock %}

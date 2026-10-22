@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Giáo viên · Thi trắc nghiệm{% endblock %}
+{% block nav %}<a href="{{ url_for('student.index') }}">Trang sinh viên</a>{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ 'Tạo tài khoản giáo viên' if setup else 'Đăng nhập giáo viên' }}</h1>
+  {% if setup %}<p class="muted">Lần chạy đầu tiên: tạo tài khoản để quản lý đề thi. Tài khoản khác tạo thêm bằng lệnh
+    <code>python run.py create-teacher TÊN</code>.</p>{% endif %}
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <label>Tên đăng nhập<input name="username" required maxlength="40" autofocus autocomplete="username"></label>
+    <label>Mật khẩu<input type="password" name="password" required {% if setup %}minlength="6"{% endif %}
+      autocomplete="{{ 'new-password' if setup else 'current-password' }}"></label>
+    {% if setup %}<label>Nhập lại mật khẩu<input type="password" name="password2" required minlength="6" autocomplete="new-password"></label>{% endif %}
+    <button class="btn primary block">{{ 'Tạo tài khoản' if setup else 'Đăng nhập' }}</button>
+  </form>
+</section>
+{% endblock %}

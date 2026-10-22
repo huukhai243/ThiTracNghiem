@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}{{ e.title }} · Thi trắc nghiệm{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ e.title }}</h1>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('teacher.results', exam_id=e.id) }}">Bảng điểm</a>
+    <a href="{{ url_for('teacher.dashboard') }}">← Danh sách đề</a>
+  </div>
+</div>
+
+<section class="card">
+  <div class="page-head" style="margin:0">
+    <div>
+      <div class="muted">Mã phòng thi</div>
+      <span class="code big">{{ e.code }}</span>
+      {% if e.is_open %}<span class="pill green">Đang mở</span>{% else %}<span class="pill">Đang đóng</span>{% endif %}
+    </div>
+    <form method="post" action="{{ url_for('teacher.toggle', exam_id=e.id) }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}">
+      {% if e.is_open %}<button class="btn danger">Đóng phòng thi</button>
+      {% else %}<button class="btn green" {{ 'disabled' if not questions }}>Mở phòng thi</button>{% endif %}
+    </form>
+  </div>
+  <div class="stats" style="margin:16px 0 0">
+    <div class="stat"><div class="k">Ngân hàng</div><div class="v">{{ questions|length }} câu</div></div>
+    <div class="stat"><div class="k">Mỗi sinh viên làm</div><div class="v">{{ e.num_questions }} câu</div></div>
+    <div class="stat"><div class="k">Thời gian</div><div class="v">{{ e.duration_min }} phút</div></div>
+    <div class="stat"><div class="k">Lượt thi</div><div class="v">{{ attempts }}</div></div>
+  </div>
+  {% if e.start_at or e.end_at %}<p class="hint">Khung giờ: {{ e.start_at|vn('%H:%M %d/%m/%Y') if e.start_at else 'bất kỳ' }}
+    → {{ e.end_at|vn('%H:%M %d/%m/%Y') if e.end_at else 'không giới hạn' }}</p>{% endif %}
+  {% include 'teacher/_join_hint.html' %}
+</section>
+
+<section class="card">
+  <h2>Cài đặt đề thi</h2>
+  <form method="post" action="{{ url_for('teacher.settings', exam_id=e.id) }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    {% with s = e %}{% include 'teacher/_settings.html' %}{% endwith %}
+    <button class="btn primary">Lưu cài đặt</button>
+  </form>
+</section>
+
+<section class="card">
+  <div class="page-head" style="margin-bottom:8px">
+    <h2 style="margin:0">Ngân hàng câu hỏi ({{ questions|length }} câu)</h2>
+    <span class="muted">{{ notes.file or e.source_file or '' }}</span>
+  </div>
+  {% if notes.errors %}
+  <div class="flash error"><b>{{ notes.errors|length }} câu bị bỏ qua vì lỗi</b> (sửa trong file Word rồi tải lại):
+    <ul class="notes">{% for m in notes.errors[:30] %}<li>{{ m }}</li>{% endfor %}</ul></div>
+  {% endif %}
+  {% if notes.warnings %}
+  <div class="flash warn"><b>Nên kiểm tra:</b><ul class="notes">{% for m in notes.warnings[:30] %}<li>{{ m }}</li>{% endfor %}</ul></div>
+  {% endif %}
+  {% if attempts == 0 %}
+  <form method="post" action="{{ url_for('teacher.upload', exam_id=e.id) }}" enctype="multipart/form-data" class="actions" style="margin-bottom:8px">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <input type="file" name="file" accept=".docx" required style="max-width:340px;margin:0">
+    <button class="btn">Thay bằng file Word khác</button>
+  </form>
+  {% else %}
+  <p class="hint" style="margin-top:0">Đã có sinh viên làm đề này nên không thay ngân hàng câu hỏi được. Con số “đúng …%” là tỉ lệ làm đúng
+    của các bài đã nộp, giúp phát hiện câu quá khó hoặc đáp án nhập sai.</p>
+  {% endif %}
+  {% for q in questions %}
+  {% set st = stats.get(q.id) %}
+  <div class="bank-q">
+    <div class="q-head"><b>Câu {{ q.number }}</b>{% if q.multi %}<span class="badge">Nhiều đáp án</span>{% endif %}</div>
+    <div class="q-text">{{ q.text }}</div>
+    <ul>{% for o in options.get(q.id, []) %}<li class="{{ 'correct' if o.is_correct }}">{{ o.label }}. {{ o.text }}</li>{% endfor %}</ul>
+    {% if st %}<div class="meta">Xuất hiện {{ st.n }} lần · đúng {{ (st.pts / st.n * 100)|round|int }}%</div>{% endif %}
+  </div>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>Xóa đề thi</h2>
+  <form method="post" action="{{ url_for('teacher.delete', exam_id=e.id) }}"
+        onsubmit="return confirm('Xóa đề thi này và toàn bộ bài làm, điểm của sinh viên? Không khôi phục được.')">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <p class="muted" style="margin-top:0">Xóa luôn tất cả bài làm và điểm. Nên xuất bảng điểm Excel trước.</p>
+    <button class="btn danger">Xóa đề thi</button>
+  </form>
+</section>
+{% endblock %}
