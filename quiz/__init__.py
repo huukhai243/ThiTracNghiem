@@ -1,7 +1,6 @@
 """Web thi trắc nghiệm: giáo viên tải ngân hàng câu hỏi bằng file Word, sinh viên vào thi bằng mã phòng thi."""
 import os
 import secrets
-from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, abort, render_template, request, session
@@ -43,8 +42,8 @@ def create_app(config=None):
 
     @app.template_filter('vn')
     def vn_time(value, fmt='%H:%M:%S %d/%m/%Y'):
-        """Thời gian UTC trong CSDL -> giờ địa phương."""
-        return datetime.fromisoformat(value).astimezone().strftime(fmt) if value else ''
+        """Thời gian UTC trong CSDL -> giờ Việt Nam."""
+        return db.local(value).strftime(fmt) if value else ''
 
     @app.errorhandler(400)
     @app.errorhandler(403)

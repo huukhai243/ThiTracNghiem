@@ -54,6 +54,14 @@ Trong Docker, trang web không tự biết IP thật của máy bạn. Nếu mu�
 $env:PUBLIC_URL = "http://192.168.1.10:8000"; docker compose up -d --build
 ```
 
+### Cách 3: Đưa lên Internet (khuyên dùng khi thi thật)
+
+Web có địa chỉ cố định `https://...`, nên sinh viên ở đâu cũng vào thi được và máy giáo viên tắt cũng không sao.
+Xem hướng dẫn từng bước: **[docs/TRIEN_KHAI_INTERNET.md](docs/TRIEN_KHAI_INTERNET.md)** (PythonAnywhere, có gói miễn phí).
+
+Giờ hiển thị và giờ mở/đóng phòng luôn theo **giờ Việt Nam**, dù máy chủ đặt ở đâu.
+Muốn đổi múi giờ thì đặt biến môi trường `QUIZ_TZ`, ví dụ `QUIZ_TZ=Asia/Bangkok`.
+
 ## Hướng dẫn cho giáo viên
 
 1. **Tạo tài khoản.** Lần đầu vào `http://localhost:8000/teacher`, trang tự chuyển sang bước tạo tài khoản giáo viên.
@@ -147,6 +155,8 @@ A. 2        B. 9        C. 7        D. 15
 
 ```
 run.py                  chạy server, tạo tài khoản giáo viên
+wsgi.py                 điểm vào cho máy chủ thuê (PythonAnywhere, gunicorn)
+docs/                   hướng dẫn đưa lên Internet
 quiz/
   parser.py             đọc ngân hàng câu hỏi từ file Word
   grading.py            rút đề ngẫu nhiên, trộn phương án, chấm điểm
@@ -173,3 +183,4 @@ python -m unittest discover -s tests -v
 | python-docx | 1.2.0 | đọc file Word |
 | openpyxl | 3.1.5 | xuất Excel |
 | waitress | 3.0.2 | máy chủ web, chạy được trên Windows |
+| tzdata | 2026.5 | dữ liệu múi giờ (Windows không có sẵn) |

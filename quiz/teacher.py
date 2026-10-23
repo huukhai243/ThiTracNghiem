@@ -9,7 +9,7 @@ from datetime import datetime
 from flask import Blueprint, abort, flash, redirect, render_template, request, send_file, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .db import from_iso, get_db, now_iso, now_utc, to_iso
+from .db import LOCAL_TZ, from_iso, get_db, now_iso, now_utc, to_iso
 from .export import results_workbook
 from .grading import finish_expired, grade
 from .parser import parse_docx
@@ -120,7 +120,7 @@ def read_settings(form):
 
     def when(name):
         s = form.get(name, '').strip()
-        return to_iso(datetime.strptime(s, '%Y-%m-%dT%H:%M').astimezone()) if s else None   # giờ địa phương -> UTC
+        return to_iso(datetime.strptime(s, '%Y-%m-%dT%H:%M').replace(tzinfo=LOCAL_TZ)) if s else None   # giờ VN -> UTC
 
     s = {'title': ' '.join(form.get('title', '').split()), 'num_questions': num('num_questions', 1, 1000),
          'duration_min': num('duration_min', 1, 600), 'shuffle_options': int(form.get('shuffle_options') == '1'),

@@ -180,6 +180,15 @@ class Flow(unittest.TestCase):
         row = self.db().execute('SELECT status, score FROM attempts').fetchone()
         self.assertEqual((row['status'], row['score']), ('timeout', 0.0))
 
+    def test_times_use_vietnam_timezone(self):
+        """Giờ mở phòng giáo viên nhập là giờ Việt Nam, kể cả khi máy chủ chạy giờ UTC."""
+        exam = self.make_exam()
+        self.post(self.teacher, f'/teacher/exams/{exam["id"]}/settings', title='Đề', num_questions='40', duration_min='30',
+                  shuffle_options='1', multi_mode='all', start_at='2030-01-01T08:00', end_at='')
+        self.assertEqual(self.db().execute('SELECT start_at FROM exams').fetchone()[0], '2030-01-01T01:00:00+00:00')
+        self.assertIn('Phòng thi mở lúc 08:00 01/01/2030', self.join(self.client(), exam['code'], 'SV030').data.decode())
+        self.assertIn('value="2030-01-01T08:00"', self.teacher.get(f'/teacher/exams/{exam["id"]}').data.decode())
+
     def test_csrf_and_login_required(self):
         c = self.app.test_client()
         self.assertEqual(c.post('/join', data={'code': 'X'}).status_code, 400)

@@ -1,8 +1,14 @@
+import os
 import sqlite3
 import threading
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from flask import current_app, g
+
+# Múi giờ hiển thị và múi giờ của giờ mở/đóng phòng giáo viên nhập. Không dùng giờ hệ thống vì máy chủ thuê
+# trên Internet thường chạy giờ UTC (lệch 7 tiếng so với Việt Nam).
+LOCAL_TZ = ZoneInfo(os.environ.get('QUIZ_TZ', 'Asia/Ho_Chi_Minh'))
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS teachers(
@@ -98,3 +104,8 @@ def now_iso():
 
 def from_iso(s):
     return datetime.fromisoformat(s) if s else None
+
+
+def local(s):
+    """Thời gian ISO (UTC) trong CSDL -> giờ Việt Nam (hoặc múi giờ QUIZ_TZ)."""
+    return from_iso(s).astimezone(LOCAL_TZ) if s else None

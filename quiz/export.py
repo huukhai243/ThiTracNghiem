@@ -6,7 +6,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-from .db import from_iso
+from .db import LOCAL_TZ, local
 
 STATUS = {'submitted': 'Đã nộp', 'timeout': 'Hết giờ, tự nộp', 'doing': 'Đang làm'}
 HEAD = ['STT', 'MSSV', 'Họ và tên', 'Lớp', 'Điểm (thang 10)', 'Số câu đúng', 'Tổng số câu', 'Bắt đầu', 'Nộp bài',
@@ -15,7 +15,7 @@ WIDTH = [6, 14, 28, 12, 15, 12, 12, 19, 19, 19, 16]
 
 
 def _local(s):
-    return from_iso(s).astimezone().replace(tzinfo=None) if s else None
+    return local(s).replace(tzinfo=None) if s else None      # Excel không lưu múi giờ
 
 
 def results_workbook(exam, rows):
@@ -24,7 +24,7 @@ def results_workbook(exam, rows):
     ws.title = 'Bảng điểm'
     ws.append([f'BẢNG ĐIỂM: {exam["title"]}'])
     ws.append([f'Mã phòng thi: {exam["code"]}   ·   {exam["num_questions"]} câu   ·   {exam["duration_min"]} phút   ·   '
-               f'xuất lúc {datetime.now().strftime("%H:%M %d/%m/%Y")}'])
+               f'xuất lúc {datetime.now(LOCAL_TZ).strftime("%H:%M %d/%m/%Y")}'])
     ws.append([])
     ws.append(HEAD)
     ws['A1'].font = Font(bold=True, size=14)

@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 
-from .db import from_iso, get_db, now_utc, to_iso
+from .db import from_iso, get_db, local, now_utc, to_iso
 from .grading import GRACE_SECONDS, finish, pick_items
 from .parser import LETTERS
 
@@ -19,7 +19,7 @@ def window_error(exam, now):
     """Lý do chưa vào thi được (None = vào được)."""
     if exam is None or not exam['is_open']: return 'Mã phòng thi không đúng hoặc phòng thi chưa mở.'
     if exam['start_at'] and now < from_iso(exam['start_at']):
-        return 'Phòng thi mở lúc ' + from_iso(exam['start_at']).astimezone().strftime('%H:%M %d/%m/%Y') + '.'
+        return 'Phòng thi mở lúc ' + local(exam['start_at']).strftime('%H:%M %d/%m/%Y') + '.'
     if exam['end_at'] and now >= from_iso(exam['end_at']): return 'Phòng thi đã đóng.'
     return None
 

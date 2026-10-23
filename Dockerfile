@@ -10,7 +10,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY quiz ./quiz
 COPY tests ./tests
-COPY run.py ./
+COPY run.py wsgi.py ./
 
 EXPOSE 8000
 CMD ["python", "run.py", "--port", "8000"]
