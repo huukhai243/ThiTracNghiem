@@ -1,4 +1,5 @@
 import sqlite3
+import threading
 from datetime import datetime, timezone
 
 from flask import current_app, g
@@ -36,8 +37,30 @@ CREATE INDEX IF NOT EXISTS idx_items_question ON attempt_items(question_id);
 """
 
 
+_write_lock = threading.RLock()
+
+
+class Connection(sqlite3.Connection):
+    """`with con:` là một transaction ghi. Các luồng trong server xếp hàng lần lượt bằng khóa này, thay vì để SQLite
+    tự chờ khóa kiểu thử lại (busy timeout): khi 50 sinh viên cùng ghi, cách đó làm vài người phải chờ tới vài giây."""
+
+    def __enter__(self):
+        _write_lock.acquire()
+        try:
+            return super().__enter__()
+        except BaseException:
+            _write_lock.release()
+            raise
+
+    def __exit__(self, *exc):
+        try:
+            return super().__exit__(*exc)
+        finally:
+            _write_lock.release()
+
+
 def connect(path):
-    con = sqlite3.connect(path, timeout=15)
+    con = sqlite3.connect(path, timeout=15, factory=Connection)
     con.row_factory = sqlite3.Row
     con.execute('PRAGMA foreign_keys = ON')
     return con
